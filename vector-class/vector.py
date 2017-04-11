@@ -2,6 +2,7 @@ import math
 
 
 class Vector(object):
+
     def __init__(self, coordinates):
         try:
             if not coordinates:
@@ -51,6 +52,7 @@ class Vector(object):
         return sum(coords) ** (1 / 2)
 
     def direction(self):
+        # the direction of the unit vector.
         # direction = 1 / magnitude * vector
         return self.scalarMultiply(1 / self.magnitude())
 
@@ -93,18 +95,40 @@ class Vector(object):
 
     def checkOrthogonal(self, w):
         # if the dot product is 0, then its orthogonal
-        return self.dotProduct(w) == 0
+        return self.dotProduct(w) == 0.0
 
+    def projection(self, b):
+        # it is also the parallel component of a vector compared to b
+        # the projection of v unto b = (v * unit vector b) * unit vector b
+        unitB = b.direction()
+        return unitB.scalarMultiply(self.dotProduct(unitB))
 
-# 4. quiz: parallel or orthogonal
-print(Vector([-7.579, -7.88]).checkParallel(Vector([22.737, 23.64])))
-print(Vector([-7.579, -7.88]).checkOrthogonal(Vector([22.737, 23.64])))
+    def orthogonalComponent(self, b):
+        # the orthogonal component is the vector minus its parallel one
+        return self.minus(self.projection(b))
 
-print(Vector([-2.029, 9.97, 4.172]).checkParallel(Vector([-9.231, -6.639, -7.245])))
-print(Vector([-2.029, 9.97, 4.172]).checkOrthogonal(Vector([-9.231, -6.639, -7.245])))
+    def decompose(self, b):
+        # i'm printing these here because when i return it,
+        # i can't see the enitre vector within muy console
+        print(self.projection(b), self.orthogonalComponent(b))
+        return (self.projection(b), self.orthogonalComponent(b))
 
-print(Vector([-2.328, -7.284, -1.214]).dotProduct(Vector([-1.821, 1.072, -2.94])))
-print(Vector([-2.328, -7.284, -1.214]).checkOrthogonal(Vector([-1.821, 1.072, -2.94])))
+    def crossProduct(self, w):
+        if len(self.coordinates) == 2:
+            self.coordinates = [self.coordinates, 0]
 
-print(Vector([2.118, 4.827]).checkParallel(Vector([0, 0])))
-print(Vector([2.118, 4.827]).checkOrthogonal(Vector([0, 0])))
+        first = self.coordinates[1]*w.coordinates[2] - w.coordinates[1]*self.coordinates[2]
+        second = self.coordinates[0]*w.coordinates[2] - w.coordinates[0]*self.coordinates[2]
+        third = self.coordinates[0]*w.coordinates[1] - w.coordinates[0]*self.coordinates[1]
+
+        return Vector([first, -second, third])
+
+    def areaOfParallelogram(self, w):
+        return self.crossProduct(w).magnitude()
+
+    def areaOfTriangle(self, w):
+        return self.crossProduct(w).magnitude() * .5
+
+print(Vector([8.462, 7.893, -8.187]).crossProduct(Vector([6.984, -5.975, 4.778])))
+print(Vector([-8.987, -9.838, 5.031]).areaOfParallelogram(Vector([-4.268, -1.861, -8.866])))
+print(Vector([1.5, 9.547, 3.691]).areaOfTriangle(Vector([-6.007, .124, 5.772])))
